@@ -1,0 +1,94 @@
+---
+title: "Who Bore the Strain? Faculty vs. Administrative Compensation Trends"
+author: "Sam English"
+date: "10/14/2026"
+format: pdf
+bibliography: capstone.bib
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+Administrative staffing and spending at U.S. colleges has grown faster than instructional staffing over recent decades, a trend often described as "administrative bloat" in higher education discourse [@ginsberg2011]. At the same time, two major financial shocks — the 2008 recession and the COVID-19 pandemic — put sustained budget pressure on institutions, raising the question of which group, faculty or administrators, bore more of the resulting strain. This analysis compares real, inflation-adjusted average compensation for faculty and administrative staff across a panel of liberal arts colleges from 2005 to 2024, to see how each group's pay evolved relative to the other, particularly around these two shock periods.
+
+Salary and staffing data come from IPEDS [@ipeds2024] (via the educationdata R package), pulled annually for faculty (2005–2024) and administrative staff (2012–2024, the years IPEDS reports this category consistently) across 19 liberal arts colleges. Because IPEDS reports overlapping, inconsistently coded aggregate categories across years, each institution-year observation was resolved by selecting the single row with the largest reported staff count, rather than summing across categories, to avoid double-counting. All dollar figures were converted to 2024 dollars using a CPI deflator built from BLS data [@bls2024cpi], so that changes over time reflect real compensation rather than nominal growth or inflation. This approach to constructing comparable staffing and compensation categories from IPEDS over time follows the methodological precedent set by prior work on administrative cost growth in higher education [@hedrick2009; @desrochers2014].
+
+```{r}
+library(tidyverse)
+faculty_salaries <- read_csv("data/faculty_salaries_filtered.csv")
+admin_salaries   <- read_csv("data/admin_salaries_filtered.csv")
+cpi_annual       <- read_csv("data/cpi_deflator.csv")
+
+trend_data <- faculty_salaries %>%
+  filter(academic_rank %in% c(1, 2, 3), sex == 99, salary_outlays >= 0) %>%
+  group_by(year, unitid, academic_rank_label) %>%
+  slice_max(instruc_staff_count, n = 1, with_ties = FALSE) %>%
+  ungroup() %>%
+  group_by(year, academic_rank_label) %>%
+  summarise(avg_salary = mean(real_salary_2024, na.rm = TRUE), .groups = "drop")
+
+admin_trend <- admin_salaries %>%
+  filter(staff_category %in% c(5, 6), noninstruc_staff_count > 0) %>%
+  group_by(year, unitid) %>%
+  summarise(
+    total_outlays = sum(salary_outlays, na.rm = TRUE),
+    total_staff   = sum(noninstruc_staff_count, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  left_join(cpi_annual %>% select(year, deflator_to_2024), by = "year") %>%
+  mutate(college_real_avg = (total_outlays / total_staff) * deflator_to_2024) %>%
+  group_by(year) %>%
+  summarise(avg_salary = mean(college_real_avg, na.rm = TRUE), .groups = "drop") %>%
+  mutate(academic_rank_label = "Administrative (Mgmt + Business/Fin Ops)")
+
+combined_trend <- bind_rows(trend_data, admin_trend)
+
+ggplot(combined_trend, aes(x = year, y = avg_salary, color = academic_rank_label)) +
+  geom_line(linewidth = 1) +
+  labs(
+    title = "Average Faculty vs. Administrative Salary (Real, 2024 Dollars)",
+    subtitle = "Averaged across 19 liberal arts colleges",
+    x = "Year", y = "Average Salary (2024 dollars)", color = "Group"
+  ) +
+  theme_minimal()
+```
+
+All four groups show relatively stable real compensation from 2005 through 2019, with a modest dip a few years after the 2008 recession appearing across every group. The clearest shift comes after 2020: every group's real compensation declines, but full professors see the steepest drop, falling from roughly \$178,000 in 2019 to about \$162,000 by 2024 (a decline of roughly 9%), compared to a roughly 5% decline for administrative staff over the same period. This suggests that, at least among this sample of 19 liberal arts colleges, full professors bore a larger share of the real compensation strain from the COVID-19 shock than administrators did, which runs counter to the "administrative bloat" narrative that motivated this analysis. A paired t-test comparing each institution's percent change in real compensation from 2019 to 2021 confirms this gap is statistically significant: faculty's decline was on average 3.4 percentage points larger than administrators' (t(18) = -2.34, p = 0.031, 95% CI: -6.46 to -0.35 percentage points). Average per-person pay, however, only tells part of the story — it doesn't capture whether a growing number of administrators means total administrative spending is rising even as individual pay falls. To test this directly, total real payroll for each group is examined next.
+
+```{r}
+faculty_total <- faculty_salaries %>%
+  filter(academic_rank %in% c(1, 2, 3), sex == 99, salary_outlays >= 0) %>%
+  group_by(year, unitid, academic_rank_label) %>%
+  slice_max(instruc_staff_count, n = 1, with_ties = FALSE) %>%
+  ungroup() %>%
+  group_by(year) %>%
+  summarise(total_outlays = sum(salary_outlays, na.rm = TRUE), .groups = "drop") %>%
+  left_join(cpi_annual %>% select(year, deflator_to_2024), by = "year") %>%
+  mutate(total_real_payroll = total_outlays * deflator_to_2024, group = "Faculty")
+
+admin_total <- admin_salaries %>%
+  filter(staff_category %in% c(5, 6), noninstruc_staff_count > 0) %>%
+  group_by(year) %>%
+  summarise(total_outlays = sum(salary_outlays, na.rm = TRUE), .groups = "drop") %>%
+  left_join(cpi_annual %>% select(year, deflator_to_2024), by = "year") %>%
+  mutate(total_real_payroll = total_outlays * deflator_to_2024, group = "Administrative")
+
+payroll_combined <- bind_rows(faculty_total, admin_total)
+
+ggplot(payroll_combined, aes(x = year, y = total_real_payroll, color = group)) +
+  geom_line(linewidth = 1) +
+  scale_y_continuous(labels = scales::label_dollar(scale = 1e-6, suffix = "M")) +
+  labs(
+    title = "Total Real Payroll: Faculty vs. Administrative Staff",
+    subtitle = "Summed across 19 liberal arts colleges, 2024 dollars",
+    x = "Year", y = "Total Real Payroll (2024 dollars)", color = "Group"
+  ) +
+  theme_minimal()
+```
+
+Total real payroll tells a different story than per-person averages. Faculty total payroll rose from about \$457.6 million in 2005 to a peak of roughly \$524.2 million in 2016, then fell to about \$488.6 million by 2022 before partially recovering to \$505.3 million in 2024 — a net increase of only 4.5% from 2012 to 2024. Administrative total payroll, by contrast, rose steadily and almost without interruption, from about \$257.6 million in 2012 to roughly \$344.3 million in 2024, an increase of 33.7% over that same window — more than seven times faculty's growth rate. The contrast is sharpest between 2016 and 2022, spanning the COVID-19 period: faculty total payroll fell by about 6.8% over those years, while administrative total payroll continued rising by about 11.4%. Taken together with the per-person findings above, this suggests that administrative bloat is more visible in headcount-driven total spending than in individual compensation: administrators were not, on average, paid dramatically more than before, but there were enough more of them that total administrative spending kept growing — including through the pandemic — while total faculty spending stagnated and even declined.
+
+This analysis has several limitations. IPEDS's administrative staff category aggregates a range of distinct roles (management and business/financial operations) that may mask heterogeneity within the group. The sample is limited to 19 liberal arts colleges and may not generalize to other institution types. Compensation has not yet been adjusted for regional cost of living. While the paired t-test above is statistically significant, it is based on a small sample of 19 institutions, which limits its statistical power and the precision of the reported confidence interval; a more robust panel regression accounting for institution-specific factors is planned for the final analysis.
+
+# References
