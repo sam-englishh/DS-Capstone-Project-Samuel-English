@@ -1,0 +1,31 @@
+---
+title: "Faculty and Administrative Compensation at U.S. Liberal Arts Colleges"
+author: "Sam English"
+date: "11/04/2026"
+format: pdf
+bibliography: capstone.bib
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+# Introduction
+
+Administrative staffing and spending at U.S. colleges has grown faster than instructional staffing over recent decades, a trend often described as "administrative bloat" in higher education discourse [@ginsberg2011]. This raises the question of which group has been prioritized in institutional budgets over time, including during periods of financial pressure such as the 2008 recession and the COVID-19 pandemic. This question carries real stakes beyond academic curiosity. Rising administrative costs are frequently invoked in public debates over why tuition at private colleges continues to climb, yet the empirical basis for that claim, particularly at small, well resourced liberal arts institutions, is less settled than the popular narrative suggests.
+
+This project draws on two complementary bodies of work. The first is empirical research on higher-education staffing and cost patterns, which motivates the methodology used here. @hedrick2009 test econometrically whether administrative cost growth in higher education outpaces instructional cost growth, using panel regression methods on Integrated Postsecondary Education Data System (IPEDS) finance data. This analysis adopts a similar panel approach, extended with a rank-based breakdown of faculty and a sharper focus on compensation specifically, rather than institution-level finance aggregates. @desrochers2014 document a long-run national shift in higher-education staffing toward non-instructional professional and administrative positions using IPEDS data spanning the 1990s through the 2010s. Their methodological precedent for constructing comparable staffing and compensation categories from IPEDS over time is followed closely here, and their national findings serve as a benchmark against which this project's narrower panel of 19 elite liberal arts colleges can be compared. The second body of work is Ginsberg's institutional account of administrative growth in American universities [@ginsberg2011], which argues that this growth reflects a structural shift in institutional priorities that has come partly at the expense of faculty. Rather than treating Ginsberg's claims as established fact, this project uses them as a source of testable hypotheses. If administrative priorities have in fact been favored over instructional ones, that should be visible in how real compensation and staffing levels for each group have moved relative to one another over time.
+
+The research question this project addresses is whether real compensation growth for administrative staff has outpaced that of faculty over time, and whether this pattern tracks a rising ratio of students per administrator relative to students per faculty. The working hypothesis is that administrative compensation and staffing capacity have grown relative to faculty compensation and staffing capacity over the past two decades. Testing this requires moving beyond simple nominal salary comparisons, since nominal figures conflate real changes in compensation with ordinary inflation and can obscure whether a shift in average pay reflects individual raises or a changing number of people being paid.
+
+To test this, I constructed a historical panel covering 19 liberal arts colleges from 2005 to 2024, a peer comparison group used by the Pomona College Board of Trustees. The panel combines IPEDS faculty salary data by academic rank, IPEDS administrative staff salary data (available from 2012 onward), enrollment and student-faculty ratio data, and data from the U.S. Bureau of Labor Statistics to convert all figures into comparable real 2024 dollars. Because a single comparison of per-person averages cannot distinguish genuine pay growth from headcount-driven spending growth, this project examines both dimensions separately: average real compensation per person within each group, and total real payroll summed across each group. Preliminary results suggest a more nuanced picture than the hypothesis alone predicts. Per-person compensation for full professors has declined more than administrative compensation in recent years, which on its face runs counter to the administrative bloat narrative. At the same time, total administrative payroll has grown substantially faster than total faculty payroll over the full period studied, a divergence driven primarily by a large increase in administrative headcount rather than by individual administrators being paid dramatically more. These two findings are not in tension. Together they suggest that if administrative bloat exists in this sample, it shows up far more clearly in staffing levels and aggregate spending than in individual compensation.
+
+# Ethical Considerations
+
+# Data & Methods
+
+# Results
+
+# Discussion / Conclusion
+
+# References
