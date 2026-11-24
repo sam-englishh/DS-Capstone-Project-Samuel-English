@@ -1,0 +1,314 @@
+---
+title: "Faculty and Administrative Compensation at U.S. Liberal Arts Colleges"
+author: "Sam English"
+format: pdf
+bibliography: capstone.bib
+editor: visual
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+# Introduction
+
+Administrative staffing and spending at U.S. colleges has grown faster than instructional staffing over recent decades, a trend often described as "administrative bloat" in higher education discourse [@ginsberg2011]. This raises the question of which group has been prioritized in institutional budgets over time, one that carries real stakes beyond academic curiosity. Rising administrative costs are frequently invoked in public debates over why tuition at private colleges continues to climb, yet the empirical basis for that claim, particularly at small, well resourced liberal arts institutions, is less settled than the popular narrative suggests.
+
+The research question this project addresses is whether real compensation growth for administrative staff has outpaced that of faculty over time at a set of elite liberal arts colleges, whether that gap widened specifically after 2020, and whether any such gap survives once regional cost of living differences are taken into account. The working hypothesis is that administrative compensation and staffing capacity have grown relative to faculty compensation and staffing capacity over the past two decades. Testing this requires moving beyond simple nominal salary comparisons. Nominal figures conflate real compensation changes with ordinary inflation, and they do not separate a genuine pay increase from one driven simply by hiring more administrators.
+
+To test this, I constructed a historical panel covering 19 liberal arts colleges from 2005 to 2024, the peer comparison group used by the Pomona College Board of Trustees. The panel combines IPEDS faculty and administrative salary data, Bureau of Labor Statistics data to convert figures into real 2024 dollars, and Bureau of Economic Analysis regional price parity data to further adjust for cost of living differences across institutions. A panel regression with institution and year fixed effects tests whether the administrative-faculty gap widened specifically after 2020. I also lay groundwork, through institution level EIN lookups, for a planned extension using IRS Form 990 filings, which report compensation for named individual executives rather than institutional averages, to test whether any disparity is concentrated among senior leadership rather than spread evenly across administrative staff.
+
+Preliminary results suggest a more nuanced picture than the hypothesis alone predicts. Per-person compensation for full professors has declined more than administrative compensation in recent years. On its face, that runs counter to the administrative bloat narrative. At the same time, total administrative payroll has grown substantially faster than total faculty payroll over the full period studied, a divergence driven primarily by administrative headcount rather than individual pay. The panel regression finds no statistically significant widening of this gap specifically after 2020, and the cost-of-living adjustment reverses the nominal salary ranking between some institutions entirely.
+
+# Contextualization
+
+Liberal arts colleges occupy a distinct position in U.S. higher education that is often overlooked in discussions of administrative growth, which tend to focus on large public universities or elite research institutions. These are small, highly selective, tuition dependent institutions where shifts in staffing and compensation are more directly visible in the operating budget than at a larger university with more diversified revenue. The 19 colleges examined in this project make up the peer comparison group used by the Pomona College Board of Trustees, a set of institutions similar enough in size and selectivity that compensation comparisons between them are more meaningful than comparisons against higher education broadly.
+
+This project draws on two complementary bodies of work. The first is empirical research on higher education staffing and cost patterns, which motivates the methodology used here. @hedrick2009 test econometrically whether administrative cost growth in higher education outpaces instructional cost growth, using panel regression methods on IPEDS finance data. This analysis adopts a similar panel approach, extended with a rank based breakdown of faculty and a sharper focus on compensation specifically, rather than institution level finance aggregates. @desrochers2014 document a long run national shift in higher education staffing toward non instructional professional and administrative positions using IPEDS data spanning the 1990s through the 2010s. Their methodological precedent for constructing comparable staffing and compensation categories from IPEDS over time is followed closely here. The second body of work is Ginsberg's institutional account of administrative growth in American universities [@ginsberg2011], which argues that this growth reflects a structural shift in institutional priorities that has come partly at the expense of faculty. This project treats Ginsberg's claims as a source of testable hypotheses rather than established fact.
+
+# Description of the Data
+
+Salary and staffing data come from the Integrated Postsecondary Education Data System [@ipeds2024], pulled through the `educationdata` R package for faculty (2005 to 2024) and administrative staff (2012 to 2024, the years for which IPEDS reports this category consistently) across the same 19 liberal arts colleges described above. Each row in the raw data represents one combination of year, institution, academic rank or staff category, and, for faculty, sex and contract length, along with the number of staff in that combination and their combined salary outlays. These are institutional averages, not individual salary records.
+
+The raw data requires substantial cleaning before it is usable. IPEDS reports overlapping, inconsistently coded categories within a single institution year, including rollup "Total" rows that aggregate across the specific categories in the same table, and missing data placeholder codes such as a contract length field of negative one. Left unfiltered, these rows would double count the same people or introduce nonsensical values into any average. Each institution year observation is resolved by excluding rollup rank codes, excluding negative salary outlay placeholder values, and selecting the single row with the largest reported staff count when multiple rows describe the same substantive group, rather than summing across categories.
+
+All dollar figures are converted to real 2024 dollars using a CPI deflator built from Bureau of Labor Statistics data [@bls2024cpi], so that changes over time reflect actual purchasing power rather than nominal growth driven by inflation. To test whether apparent compensation differences between institutions reflect genuine gaps rather than regional cost differences, this project also incorporates Regional Price Parity data from the Bureau of Economic Analysis [@bea2024rpp], matched to each institution's specific metro area or nonmetro region rather than a statewide average. Pomona, Claremont McKenna, Pitzer, Scripps, Harvey Mudd, and Occidental all share the Los Angeles metro series, while Williams uses the Pittsfield, Massachusetts series, reflecting the substantially different costs of living in each region.
+
+Finally, this project includes preparatory data for a planned extension using IRS Form 990 filings, which report compensation for named individual officers, trustees, and highest compensated employees rather than institutional averages. Each institution's Employer Identification Number was located through the ProPublica Nonprofit Explorer API [@propublica2024]. Five institutions, Claremont McKenna, Grinnell, Haverford, Middlebury, and Smith, are registered under a formal legal name that differs from their common name, and these were matched manually and verified against the institution's city and state.
+
+# Ethical Considerations
+
+This project raises several ethical considerations, some of which have already been addressed directly and some of which remain open as the analysis continues into its next phase.
+
+
+IPEDS reports faculty and administrative compensation as institutional averages rather than individual salaries, but at smaller colleges some rank and sex categories contain so few people that the average begins to function almost like an individual salary. To guard against this, every comparison in this project uses pre-aggregated, reasonably sized groupings, and none of them attempt to infer or back out an individual's pay from a narrow category.
+
+
+The raw IPEDS files mix genuine subgroups with rollup "Total" rows and missing data placeholder codes. Left unfiltered, these values would quietly distort any average computed from the data, so the cleaning pipeline built for this project filters out aggregate rollup codes, deduplicates overlapping category rows by staff count, and excludes placeholder values before any comparison is made.
+
+
+A phrase like "administrative bloat" carries a built-in value judgment, and a widening gap between two groups' compensation does not, on its own, establish that anyone is overpaid or unnecessary. For that reason, I kept the language in this project descriptive rather than accusatory, and reported the panel regression's null result honestly instead of leaving it out because it complicated the narrative.
+
+
+The planned extension of this project links each institution to its IRS Form 990 filings, which name real individuals and their actual compensation rather than institutional averages. This data is legally public, since public disclosure is a condition of nonprofit tax status, but the project has not yet had to decide how to present it. The intention is to use named compensation figures as evidence of a systemic, institutional pattern rather than as a spotlight on specific people's pay, and that framing choice still lies ahead.
+
+
+My independent advisor for this project is a college professor, which means the side of the analysis that tends to look shortchanged relative to administrative growth is the group my advisor belongs to. The final interpretation of these results has not yet been written, and that is where positionality becomes most relevant. That is something I want to stay aware of once I move from reporting results to drawing conclusions from them. 
+
+# Analysis and Results
+
+## Average and Total Real Compensation
+
+```{r}
+#| label: setup-data
+library(tidyverse)
+library(scales)
+
+faculty_salaries <- read_csv("data/faculty_salaries_filtered.csv")
+admin_salaries   <- read_csv("data/admin_salaries_filtered.csv")
+cpi_annual       <- read_csv("data/cpi_deflator.csv")
+```
+
+```{r}
+#| label: avg-comp-trend
+trend_data <- faculty_salaries %>%
+  filter(academic_rank %in% c(1, 2, 3), sex == 99, salary_outlays >= 0) %>%
+  group_by(year, unitid, academic_rank_label) %>%
+  slice_max(instruc_staff_count, n = 1, with_ties = FALSE) %>%
+  ungroup() %>%
+  group_by(year, academic_rank_label) %>%
+  summarise(avg_salary = mean(real_salary_2024, na.rm = TRUE), .groups = "drop")
+
+admin_trend <- admin_salaries %>%
+  filter(staff_category %in% c(5, 6), noninstruc_staff_count > 0) %>%
+  group_by(year, unitid) %>%
+  summarise(
+    total_outlays = sum(salary_outlays, na.rm = TRUE),
+    total_staff   = sum(noninstruc_staff_count, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  left_join(cpi_annual %>% select(year, deflator_to_2024), by = "year") %>%
+  mutate(college_real_avg = (total_outlays / total_staff) * deflator_to_2024) %>%
+  group_by(year) %>%
+  summarise(avg_salary = mean(college_real_avg, na.rm = TRUE), .groups = "drop") %>%
+  mutate(academic_rank_label = "Administrative (Mgmt + Business/Fin Ops)")
+
+combined_trend <- bind_rows(trend_data, admin_trend)
+
+ggplot(combined_trend, aes(x = year, y = avg_salary, color = academic_rank_label)) +
+  geom_line(linewidth = 1) +
+  labs(
+    title = "Average Faculty vs. Administrative Salary (Real, 2024 Dollars)",
+    subtitle = "Averaged across 19 liberal arts colleges",
+    x = "Year", y = "Average Salary (2024 dollars)", color = "Group"
+  ) +
+  theme_minimal()
+```
+
+All four groups show relatively stable real compensation from 2005 through 2019, with a modest dip a few years after the 2008 recession appearing across every group. The clearest shift comes after 2020. Every group's real compensation declines, but full professors see the steepest drop, falling from roughly $178,000 in 2019 to about $162,000 by 2024, a decline of roughly nine percent, compared to a roughly five percent decline for administrative staff over the same period.
+
+```{r}
+#| label: covid-ttest
+faculty_inst <- faculty_salaries %>%
+  filter(academic_rank %in% c(1, 2, 3), sex == 99, salary_outlays >= 0) %>%
+  group_by(year, unitid, academic_rank_label) %>%
+  slice_max(instruc_staff_count, n = 1, with_ties = FALSE) %>%
+  ungroup() %>%
+  group_by(year, unitid) %>%
+  summarise(avg_salary = mean(real_salary_2024, na.rm = TRUE), .groups = "drop")
+
+admin_inst <- admin_salaries %>%
+  filter(staff_category %in% c(5, 6), noninstruc_staff_count > 0) %>%
+  group_by(year, unitid) %>%
+  summarise(
+    total_outlays = sum(salary_outlays, na.rm = TRUE),
+    total_staff   = sum(noninstruc_staff_count, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  left_join(cpi_annual %>% select(year, deflator_to_2024), by = "year") %>%
+  mutate(avg_salary = (total_outlays / total_staff) * deflator_to_2024) %>%
+  select(year, unitid, avg_salary)
+
+covid_change <- function(df) {
+  df %>%
+    filter(year %in% c(2019, 2021)) %>%
+    pivot_wider(names_from = year, values_from = avg_salary, names_prefix = "y") %>%
+    filter(!is.na(y2019), !is.na(y2021)) %>%
+    mutate(pct_change = (y2021 - y2019) / y2019 * 100)
+}
+
+faculty_change <- covid_change(faculty_inst) %>% select(unitid, faculty_pct_change = pct_change)
+admin_change   <- covid_change(admin_inst)   %>% select(unitid, admin_pct_change   = pct_change)
+
+paired_data <- inner_join(faculty_change, admin_change, by = "unitid")
+
+library(broom)
+
+t_result <- t.test(paired_data$faculty_pct_change, paired_data$admin_pct_change, paired = TRUE)
+
+tidy(t_result) %>%
+  transmute(
+    `Mean Difference (pts)` = round(estimate, 2),
+    `t` = round(statistic, 2),
+    `df` = parameter,
+    `p-value` = round(p.value, 3),
+    `95% CI Lower` = round(conf.low, 2),
+    `95% CI Upper` = round(conf.high, 2)
+  ) %>%
+  knitr::kable()
+```
+
+A paired t-test comparing each institution's percent change in real compensation from 2019 to 2021 confirms this gap is statistically significant. Faculty's decline was on average 3.4 percentage points larger than administrators' (t(18) = -2.34, p = 0.031, 95% CI: -6.46 to -0.35 percentage points). Average per-person pay, however, only tells part of the story, since it does not capture whether a growing number of administrators means total administrative spending is rising even as individual pay falls.
+
+```{r}
+#| label: total-payroll
+faculty_total <- faculty_salaries %>%
+  filter(academic_rank %in% c(1, 2, 3), sex == 99, salary_outlays >= 0) %>%
+  group_by(year, unitid, academic_rank_label) %>%
+  slice_max(instruc_staff_count, n = 1, with_ties = FALSE) %>%
+  ungroup() %>%
+  group_by(year) %>%
+  summarise(total_outlays = sum(salary_outlays, na.rm = TRUE), .groups = "drop") %>%
+  left_join(cpi_annual %>% select(year, deflator_to_2024), by = "year") %>%
+  mutate(total_real_payroll = total_outlays * deflator_to_2024, group = "Faculty")
+
+admin_total <- admin_salaries %>%
+  filter(staff_category %in% c(5, 6), noninstruc_staff_count > 0) %>%
+  group_by(year) %>%
+  summarise(total_outlays = sum(salary_outlays, na.rm = TRUE), .groups = "drop") %>%
+  left_join(cpi_annual %>% select(year, deflator_to_2024), by = "year") %>%
+  mutate(total_real_payroll = total_outlays * deflator_to_2024, group = "Administrative")
+
+payroll_combined <- bind_rows(faculty_total, admin_total)
+
+ggplot(payroll_combined, aes(x = year, y = total_real_payroll, color = group)) +
+  geom_line(linewidth = 1) +
+  scale_y_continuous(labels = scales::label_dollar(scale = 1e-6, suffix = "M")) +
+  labs(
+    title = "Total Real Payroll: Faculty vs. Administrative Staff",
+    subtitle = "Summed across 19 liberal arts colleges, 2024 dollars",
+    x = "Year", y = "Total Real Payroll (2024 dollars)", color = "Group"
+  ) +
+  theme_minimal()
+```
+
+Total real payroll tells a different story than per-person averages. Faculty total payroll rose from about $483.8 million in 2012 to about $505.3 million in 2024, a net increase of 4.5 percent. Administrative total payroll, by contrast, rose from about $257.6 million in 2012 to roughly $344.3 million in 2024, an increase of 33.7 percent over the same window, more than seven times faculty's growth rate. The contrast is sharpest between 2016 and 2022, spanning the COVID-19 period. Faculty total payroll fell by about 6.8 percent over those years, while administrative total payroll continued rising by about 11.4 percent. Taken together with the per-person findings above, administrative bloat in this sample is more visible in headcount-driven total spending than in individual compensation. Administrators were not, on average, paid dramatically more than before, but there were enough more of them that total administrative spending kept growing, including through the pandemic, while total faculty spending stagnated.
+
+## Adjusting for Regional Cost of Living
+
+Comparing raw salaries across institutions in different parts of the country risks mistaking a regional cost-of-living difference for a genuine compensation gap. The chart below highlights full professor salaries at Pomona, Claremont McKenna, and Williams against the 19-college panel, first without any cost-of-living adjustment and then adjusted using each institution's Regional Price Parity series.
+
+```{r}
+#| label: col-chart
+professor_trend <- faculty_salaries %>%
+  filter(academic_rank_label == "Professor", sex == 99, salary_outlays >= 0) %>%
+  group_by(year, unitid, inst_name) %>%
+  slice_max(instruc_staff_count, n = 1, with_ties = FALSE) %>%
+  ungroup() %>%
+  select(year, inst_name, real_salary_2024, real_salary_2024_colAdj) %>%
+  mutate(highlight = inst_name %in% c("Pomona College", "Williams College", "Claremont McKenna College"))
+
+y_range <- range(c(professor_trend$real_salary_2024, professor_trend$real_salary_2024_colAdj), na.rm = TRUE)
+
+highlight_colors <- c(
+  "Pomona College" = "#2C7BB6",
+  "Williams College" = "#D7191C",
+  "Claremont McKenna College" = "#1A9641"
+)
+
+plot_highlighted <- function(data, y_var, title, subtitle, y_lab) {
+  y_var <- rlang::sym(y_var)
+  label_data <- data %>%
+    filter(highlight, !is.na(!!y_var)) %>%
+    group_by(inst_name) %>%
+    filter(year == max(year)) %>%
+    ungroup()
+  ggplot(data, aes(x = year, y = !!y_var, group = inst_name)) +
+    geom_line(data = filter(data, !highlight), color = "grey80", linewidth = 0.5) +
+    geom_line(data = filter(data, highlight), aes(color = inst_name), linewidth = 1.2) +
+    geom_text(data = label_data, aes(label = inst_name, color = inst_name),
+              hjust = 0, nudge_x = 0.3, fontface = "bold", size = 3.5, show.legend = FALSE) +
+    coord_cartesian(ylim = y_range, clip = "off") +
+    scale_x_continuous(expand = expansion(mult = c(0.02, 0.22))) +
+    scale_y_continuous(labels = scales::label_dollar()) +
+    scale_color_manual(values = highlight_colors) +
+    labs(title = title, subtitle = subtitle, x = "Year", y = y_lab) +
+    theme_minimal() +
+    theme(legend.position = "none", plot.margin = margin(5.5, 90, 5.5, 5.5))
+}
+
+plot_highlighted(professor_trend, "real_salary_2024",
+  "Professor Salary: Pomona, CMC & Williams (with 19-College Context)",
+  "Real 2024 dollars, no cost-of-living adjustment", "Average Professor Salary")
+```
+
+```{r}
+#| label: col-chart-adjusted
+plot_highlighted(professor_trend, "real_salary_2024_colAdj",
+  "Professor Salary: Pomona, CMC & Williams (with 19-College Context)",
+  "Real 2024 dollars, adjusted for local cost of living", "Average Professor Salary (COL-Adjusted)")
+```
+
+In 2024, Pomona's full professors earned a nominal real average of $183,711 and Claremont McKenna's earned $192,382, both above Williams' $178,524. Once adjusted for the cost of living in each institution's metro area, that ordering reverses. Williams' adjusted figure rises to $187,711, while Pomona's falls to $161,766 and Claremont McKenna's falls to $169,401, since both share the expensive Los Angeles metro area while Williams sits in a much less expensive part of western Massachusetts. A comparison that looked only at nominal salary would have concluded that Pomona and Claremont McKenna faculty are paid more than Williams faculty, when the opposite is closer to true once the same dollar is measured against what it can actually buy where each person lives.
+
+## Panel Regression
+
+The patterns above raise a further question. If administrative compensation and staffing have grown relative to faculty, did that gap widen specifically after 2020, once institution-specific and year-specific factors are accounted for rather than compared across only two single years. This is tested with a panel regression using institution and year fixed effects, with standard errors clustered by institution.
+
+```{r}
+#| label: panel-regression
+library(fixest)
+
+faculty_panel <- faculty_salaries %>%
+  filter(academic_rank %in% c(1, 2, 3), sex == 99, salary_outlays >= 0) %>%
+  group_by(year, unitid, inst_name, academic_rank_label) %>%
+  slice_max(instruc_staff_count, n = 1, with_ties = FALSE) %>%
+  ungroup() %>%
+  group_by(year, unitid, inst_name) %>%
+  summarise(real_comp = mean(real_salary_2024, na.rm = TRUE), .groups = "drop") %>%
+  mutate(staff_type = "Faculty")
+
+admin_panel <- admin_salaries %>%
+  filter(staff_category %in% c(5, 6), noninstruc_staff_count > 0) %>%
+  group_by(year, unitid, inst_name) %>%
+  summarise(
+    total_outlays = sum(salary_outlays, na.rm = TRUE),
+    total_staff   = sum(noninstruc_staff_count, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  left_join(faculty_salaries %>% distinct(year, deflator_to_2024), by = "year") %>%
+  mutate(real_comp = (total_outlays / total_staff) * deflator_to_2024) %>%
+  select(year, unitid, inst_name, real_comp) %>%
+  mutate(staff_type = "Administrative")
+
+panel <- bind_rows(faculty_panel, admin_panel) %>%
+  filter(year >= 2012) %>%
+  mutate(
+    staff_type  = factor(staff_type, levels = c("Faculty", "Administrative")),
+    time_period = factor(if_else(year >= 2020, "Pandemic & After", "2012-2019"),
+                         levels = c("2012-2019", "Pandemic & After")),
+    unitid      = factor(unitid)
+  )
+
+model <- feols(
+  real_comp ~ staff_type * time_period | unitid + year,
+  data    = panel,
+  cluster = ~unitid
+)
+
+etable(model)
+```
+
+The interaction term, which captures whether administrative compensation grew relative to faculty specifically after 2020, is small and statistically insignificant. This null result does not contradict the paired t-test above. The t-test isolated a sharp, short window around a single shock, 2019 to 2021, while this regression averages over the entire 2020 to 2024 period and controls for year-to-year shocks common to every institution through the year fixed effects.
+
+The regression also treats "Administrative" as a single category covering everyone from mid-level managers to senior leadership, averaged together. If a compensation shift exists but is concentrated among a small number of senior administrators, such as college presidents, averaging across the entire category would wash that effect out and produce exactly the null result shown above. The sample is also limited to 19 institutions, which constrains statistical power regardless of category definitions. I plan to address this directly before the final draft by building the IRS Form 990 panel described in the Description of the Data section, which reports compensation for named individual executives rather than category averages, and would let me test the seniority-based version of this question rather than infer it indirectly from a null result on a broader category.
+
+# Conclusion
+
+Taken as a whole, the evidence gathered so far presents a more layered picture than the administrative bloat narrative alone would predict. Per-person compensation for full professors fell more than administrative compensation through the pandemic years, which runs against that narrative directly. At the same time, total administrative payroll grew roughly seven times faster than total faculty payroll from 2012 to 2024. That part fits the bloat narrative, and it comes mostly from hiring more administrators rather than paying existing ones more. A panel regression that controls for institution and year effects finds no statistically significant widening of the administrative-faculty gap specifically after 2020, suggesting that if a shift exists, it is not uniform across the administrative category as IPEDS defines it.
+
+The cost-of-living comparison adds a further caution against reading too much into raw salary figures alone. Nominal rankings between institutions can reverse once regional price differences are accounted for, which means any cross-institution comparison in this project, and the comparisons other researchers draw from similar data, should be read with that adjustment in mind rather than taken at face value.
+
+The clearest next step is building the Form 990 panel that the EIN lookup table makes possible, so that the seniority-based hypothesis raised by the panel regression's null result can be tested directly rather than inferred from a single filing. Longer term, I plan to turn this static analysis into an interactive Shiny application, so that readers can explore the comparison across different institutions, rank groupings, and time periods themselves rather than relying only on the specific comparisons presented here. This sample remains limited to 19 well-resourced liberal arts colleges and should not be generalized to higher education broadly. As I move from reporting results to drawing conclusions, I want to keep the researcher positionality issue and the loaded framing of administrative bloat in mind rather than letting them sit unexamined.
+
+# References
